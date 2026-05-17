@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% block title %}{{ app_name }} — панель{% endblock %}
+{% block body %}
+<div class="topbar">
+  {% with show_tagline=true, badge_text='SMTP Mail.ru · до ' ~ max_emails ~ ' писем за раз' %}
+    {% include '_brand.html' %}
+  {% endwith %}
+  <a href="{{ url_for('logout') }}" class="logout">Выйти</a>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for cat, msg in messages %}
+    <div class="flash flash-{{ cat }}">{{ msg }}</div>
+  {% endfor %}
+{% endwith %}
+
+{% if not smtp_ok %}
+  <div class="flash flash-err">SMTP не настроен. Создайте файл .env по образцу .env.example</div>
+{% endif %}
+
+<div class="grid">
+  <aside>
+    <div class="card">
+      <h2>База email</h2>
+      <p class="metric">{{ active_count }}</p>
+      <p class="metric-label">активных получателей</p>
+      <p class="small">Отписались: {{ unsub_count }}</p>
+      <form method="post" action="{{ url_for('import_demo') }}" style="margin-top:12px">
+        <button type="submit" class="btn btn-secondary" style="width:100%">Пример CSV</button>
+      </form>
+      <form method="post" action="{{ url_for('import_csv') }}" enctype="multipart/form-data" style="margin-top:10px">
+        <label>Загрузить CSV</label>
+        <input type="file" name="file" accept=".csv" required style="margin:8px 0">
+        <button type="submit" class="btn btn-secondary" style="width:100%">Импорт</button>
+      </form>
+      {% if preview_rows %}
+      <div style="margin-top:12px;overflow:auto;max-height:180px;">
+        <table>
+          <tr><th>Email</th><th></th></tr>
+          {% for r in preview_rows %}
+          <tr>
+            <td>{{ r.email }}</td>
+            <td>{% if r.unsubscribed %}<span class="status-err">off</span>{% endif %}</td>
+          </tr>
+          {% endfor %}
+        </table>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <h2>Отправитель</h2>
+      <p class="small">{{ smtp_from or '—' }}</p>
+      <p class="hint">Пароль приложения Mail.ru хранится в .env на сервере.</p>
+    </div>
+  </aside>
+
+  <main>
+    <form method="post" action="{{ url_for('save_draft') }}" enctype="multipart/form-data">
+      <div class="cols-2">
+        <div class="card">
+          <h2>Письмо</h2>
+          <label>Тема письма</label>
+          <input type="text" name="subject" value="{{ draft.subject if draft else '' }}" placeholder="Приглашение на мероприятие">
+          <label style="margin-top:12px">Текст анонса</label>
+          <textarea name="body_text" placeholder="Текст письма…">{{ draft.body_text if draft else '' }}</textarea>
+          <label style="margin-top:12px">Ссылка в тексте</label>
+          <input type="text" name="link_url" value="{{ draft.link_url if draft else '' }}" placeholder="https://…">
+          <label style="margin-top:12px">Изображение (вложение)</label>
+          <input type="file" name="image" accept="image/*">
+          {% if image_url %}
+            <p class="small" style="margin-top:8px">Текущее: {{ image_name }}</p>
+          {% endif %}
+          <div class="actions">
+            <button type="submit" class="btn btn-secondary">Сохранить черновик</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Превью</h2>
+          <div class="preview">
+            <p class="small"><strong>Тема:</strong> {{ draft.subject if draft and draft.subject else '—' }}</p>
+            {% if image_url %}
+              <img src="{{ image_url }}" alt="Вложение">
+            {% endif %}
+            <div class="preview-text">{{ draft.body_text if draft and draft.body_text else '— текст —' }}</div>
+            {% if draft and draft.link_url %}
+              <div class="preview-link"><a href="{{ draft.link_url }}" target="_blank" rel="noopener">Ссылка в письме</a></div>
+            {% endif %}
+            <p class="small" style="margin-top:16px;">В письме: plain + HTML, вложение, ссылка «Отписаться».</p>
+          </div>
+        </div>
+      </div>
+    </form>
+
+    <div class="card">
+      <h2>Запуск</h2>
+      <div class="actions">
+        <form method="post" action="{{ url_for('send_test') }}" style="display:inline">
+          <button type="submit" class="btn btn-secondary" {% if not draft %}disabled{% endif %}>Тест на {{ test_email }}</button>
+        </form>
+        <form method="post" action="{{ url_for('send_campaign') }}" style="display:inline" onsubmit="return confirm('Отправить до {{ max_emails }} писем активной базе?');">
+          <button type="submit" class="btn" {% if active_count == 0 or not draft %}disabled{% endif %}>Запустить рассылку</button>
+        </form>
+      </div>
+      {% if active_count == 0 %}
+        <p class="small" style="margin-top:10px">Импортируйте базу с email.</p>
+      {% endif %}
+    </div>
+
+    {% if report_stats and report_stats.total > 0 %}
+    <div class="card">
+      <h2>Отчёт · кампания #{{ last_campaign_id }}</h2>
+      <div class="metrics">
+        <div><p class="metric">{{ report_stats.sent }}</p><p class="metric-label">отправлено</p></div>
+        <div><p class="metric">{{ report_stats.error }}</p><p class="metric-label">ошибки</p></div>
+        <div><p class="metric">{{ report_stats.total }}</p><p class="metric-label">всего</p></div>
+      </div>
+      <a href="{{ url_for('download_report', campaign_id=last_campaign_id) }}" class="btn btn-secondary">Скачать CSV</a>
+      <table style="margin-top:16px">
+        <thead>
+          <tr><th>Email</th><th>Имя</th><th>Статус</th><th>Комментарий</th></tr>
+        </thead>
+        <tbody>
+          {% for r in report_rows %}
+          <tr>
+            <td>{{ r.email }}</td>
+            <td>{{ r.name }}</td>
+            <td class="{% if r.status == 'sent' %}status-ok{% else %}status-err{% endif %}">{{ r.status }}</td>
+            <td>{{ r.error_message }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+  </main>
+</div>
+{% endblock %}

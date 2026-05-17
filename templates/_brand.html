@@ -1,0 +1,16 @@
+<div class="brand{% if brand_centered %} brand--center{% endif %}">
+  <img
+    src="{{ url_for('static', filename='img/logo.png') }}"
+    alt="NeuroBridge"
+    class="brand-logo"
+  >
+  <div class="brand-text">
+    <p class="brand-product">{{ app_name }}</p>
+    {% if show_tagline %}
+    <p class="tagline">{{ app_tagline }}</p>
+    {% endif %}
+    {% if badge_text %}
+    <span class="badge" style="margin-top:8px;">{{ badge_text }}</span>
+    {% endif %}
+  </div>
+</div>

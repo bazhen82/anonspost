@@ -1,0 +1,7 @@
+uploads/
+__pycache__/
+*.pyc
+.venv/
+.env
+anonspost.db
+*.db

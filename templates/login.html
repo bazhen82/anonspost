@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Вход — {{ app_name }}{% endblock %}
+{% block body %}
+<div style="max-width:440px;margin:48px auto;">
+  {% with brand_centered=true, show_tagline=true %}
+    {% include '_brand.html' %}
+  {% endwith %}
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in messages %}
+      <div class="flash flash-{{ cat }}">{{ msg }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  <div class="card" style="margin-top:24px;">
+    <form method="post">
+      <label>Логин</label>
+      <input type="text" name="login" required autofocus>
+      <label style="margin-top:12px;">Пароль</label>
+      <input type="password" name="password" required>
+      <div class="actions">
+        <button type="submit" class="btn" style="width:100%;">Войти</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

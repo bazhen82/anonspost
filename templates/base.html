@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ app_name }}{% endblock %}</title>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --card: #1a2332;
+      --border: #2d3a4f;
+      --text: #e7ecf3;
+      --muted: #8b9cb3;
+      --accent: #2a9fd6;
+      --accent-hover: #3db8e8;
+      --ok: #3d9a6a;
+      --err: #c45c4a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      line-height: 1.5;
+    }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 24px 20px 48px; }
+  .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    h1 { font-size: 1.6rem; font-weight: 600; margin: 0 0 4px; }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .brand--center {
+      flex-direction: column;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    .brand-logo {
+      height: 64px;
+      width: auto;
+      max-width: 220px;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+    .brand--center .brand-logo {
+      height: 140px;
+      max-width: min(320px, 100%);
+    }
+    .brand-product {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin: 0 0 4px;
+      color: var(--text);
+    }
+    .tagline { color: var(--muted); font-size: 0.9rem; margin: 0; }
+    .badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      background: #2a3548;
+      color: var(--muted);
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+    .grid { display: grid; grid-template-columns: 280px 1fr; gap: 20px; }
+    @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+    .card h2 {
+      font-size: 0.95rem;
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+    label { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 6px; }
+    input[type=text], input[type=password], textarea {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font: inherit;
+    }
+    textarea { min-height: 140px; resize: vertical; }
+    .hint { font-size: 0.8rem; color: var(--muted); margin-top: 8px; padding: 8px; background: var(--bg); border-radius: 6px; }
+    .metric { font-size: 1.8rem; font-weight: 700; }
+    .metric-label { font-size: 0.8rem; color: var(--muted); }
+    .metrics { display: flex; gap: 24px; margin-bottom: 16px; flex-wrap: wrap; }
+    .btn {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .btn:hover { background: var(--accent-hover); }
+    .btn-secondary { background: #2a3548; }
+    .btn-secondary:hover { background: #354358; }
+    .btn-danger { background: #8b3a3a; }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+    .flash { padding: 10px 14px; border-radius: 8px; margin-bottom: 16px; font-size: 0.9rem; }
+    .flash-ok { background: rgba(61,154,106,.2); border: 1px solid var(--ok); }
+    .flash-err { background: rgba(196,92,74,.2); border: 1px solid var(--err); }
+    table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+    th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+    th { color: var(--muted); font-weight: 600; }
+    .status-ok { color: var(--ok); }
+    .status-err { color: var(--err); }
+    .preview {
+      background: var(--bg);
+      border: 1px dashed var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      min-height: 200px;
+    }
+    .preview img { max-width: 100%; border-radius: 8px; margin-bottom: 12px; }
+    .preview-text { white-space: pre-wrap; margin-bottom: 12px; }
+    .preview-link a {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .cols-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 700px) { .cols-2 { grid-template-columns: 1fr; } }
+    .small { font-size: 0.8rem; color: var(--muted); }
+    .logout { color: var(--muted); font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    {% block body %}{% endblock %}
+  </div>
+</body>
+</html>
