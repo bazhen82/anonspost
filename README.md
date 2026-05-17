@@ -4,6 +4,12 @@
 
 Pet-project / MVP для портфолио. Автор: [@bazhen82](https://github.com/bazhen82).
 
+## Скриншоты
+
+| Панель | Отчёт после рассылки |
+|--------|----------------------|
+| ![Главная панель](docs/screenshots/panel-main.jpg) | ![Отчёт](docs/screenshots/panel-report.jpg) |
+
 ## Возможности
 
 - Импорт получателей из CSV (`email`, `name`)
